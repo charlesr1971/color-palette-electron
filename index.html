@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';"/>
+
+    <style>
+
+      html, body {
+          height: 100%;
+          padding: 0px;
+          margin: 0px;
+          font-family: Arial, Helvetica, sans-serif;
+      }
+
+      .content { 
+          width: 100%;
+          height: 100vh;
+          background: rgba(0,0,0,0.75);
+      }
+        
+      h1 {
+          width: 100%;
+          color: rgba(255,255,255555555555,1);
+          text-align: center;
+          padding: 20px;
+      }
+
+      .wrapper {
+          width: 100%;
+          padding: 20px;
+      }
+
+      .container {
+          display: flex;
+          flex-wrap: wrap;
+        justify-content: space-between;
+      }
+
+      .image-container {
+          width: 200px;
+          border-top: 20px solid rgba(0,0,0,0.075);
+          border-left: 20px solid rgba(0,0,0,0.075);
+          border-right: 20px solid rgba(0,0,0,0.075);
+          box-sizing: border-box;
+      }
+
+      .image-container img {
+          width: 100%;
+      }
+
+      .palette-image {
+          position: relative;
+          width: 200px;
+          height: 200px;
+          padding: 20px;
+          background: rgba(0,0,0,0.075);
+          box-sizing: border-box;
+      }
+
+      .image-info-container {
+        height: 84px;
+        background: rgba(255,255,255,0.075);
+        /* border: 1px solid red; */
+        margin-bottom: 46px;
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      button {
+        position: absolute;
+        left: 20px;
+        bottom: 20px;
+        appearance: none;
+        border-radius: 4px;
+        background: rgba(255,255,255,0.25);
+        color: white;
+        padding: 15px 30px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: normal;
+        border: none;
+        margin: 0px;
+        outline: none;
+        z-index: 10;
+        cursor: pointer;
+      }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <!-- <button id="request-os-info">Request OS Info</button>
+    <div id="request-os-info-container"></div> -->
+
+    <main class="content">
+  
+      <h1>Color Palette</h1>
+  
+      <div class="wrapper">
+  
+        <div class="palette"> 
+          <div class="image-container">
+            <img id="image-1" src="src/app/assets/images/for-palette/1.jpg" />
+          </div>
+          <div id="palette-image-1" class="palette-image">
+            <div id="image-1-info-container" class="image-info-container"></div>
+            <button id="image-1-info">Color Palette</button>
+          </div>
+        </div>
+  
+      </div>
+    
+    </main>
+
+    <script>
+      require('./dist/app/app.js');
+    </script>
+
+  </body>
+
+</html>
