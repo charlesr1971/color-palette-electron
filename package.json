@@ -1,15 +1,16 @@
 {
-  "name": "electron-ts",
+  "name": "colorpalette",
+  "description": "Color Palette",
+  "author": "Charles Robertson <http://www.mushroom.man>",
+  "license": "MIT",
   "version": "1.0.0",
-  "description": "Yet another Electron application",
+  "main": ".dist/electron/main.js",
   "build": {
+    "asar": true,
     "asarUnpack": [
       "./node_modules/graphicsmagick-static/bin/**",
       "./node_modules/imagemagick-darwin-static/bin/**"
     ],
-    "directories": {
-      "output": "./dist/"
-    },
     "appId": "com.colorpalette.app",
     "win": {
       "target": "nsis",
@@ -21,10 +22,9 @@
     "watch": "tsc -w",
     "start": "npm run build && electron ./dist/electron/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "pack": "npm run build && electron-builder -p never --win"
+    "pack": "electron-builder --windows",
+    "postinstall": "electron-builder install-app-deps"
   },
-  "author": "Kevin Hirczy <https://nehalist.io>",
-  "license": "MIT",
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/gm": "^1.18.7",
