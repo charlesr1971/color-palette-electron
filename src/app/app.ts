@@ -8,11 +8,33 @@ import * as os from 'os';
 import * as gm from 'gm';
 import * as fs from "fs";
 
+import * as Store from "electron-store";
+
+
 // GLOBALS
 
-var debug = true;
+var debug = false;
 
 var imageHandler = null;
+
+const store = new Store();
+
+if(!store.has('swatches')){
+
+  store.set('swatches',50);
+
+  if(debug){
+    console.log("app.ts: store: store.get('swatches') 1: ",store.get('swatches'));
+  }
+
+}
+else{
+
+  if(debug){
+    console.log("app.ts: store: store.get('swatches') 2: ",store.get('swatches'));
+  }
+
+}
 
 const ipc = new IpcService();
 
@@ -47,16 +69,19 @@ if(image1Info && image1InfoContainer){
 const imagemagickPath = imagemagick.path;
 let imagemagickFixedPath = AppPaths.replaceAsar(imagemagickPath);
 
-console.log('app.ts: imagemagickFixedPath',imagemagickFixedPath);
-console.log('app.ts: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))',AppPaths.replaceAsar(path.join(imagemagick.path, "/")));
+if(debug){
+  console.log('app.ts: imagemagickFixedPath',imagemagickFixedPath);
+  console.log('app.ts: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))',AppPaths.replaceAsar(path.join(imagemagick.path, "/")));
+}
 
 const graphicsmagickPath = graphicsmagick.path;
 let graphicsmagickFixedPath = AppPaths.replaceAsar(graphicsmagickPath);
 
-console.log('app.ts: graphicsmagickFixedPath',graphicsmagickFixedPath);
-console.log('app.ts: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))',AppPaths.replaceAsar(path.join(graphicsmagick.path, "/")));
-
-console.log("app.ts: os.platform(): ",os.platform());
+if(debug){
+  console.log('app.ts: graphicsmagickFixedPath',graphicsmagickFixedPath);
+  console.log('app.ts: AppPaths.replaceAsar(path.join(graphicsmagick.path, "/"))',AppPaths.replaceAsar(path.join(graphicsmagick.path, "/")));
+  console.log("app.ts: os.platform(): ",os.platform());
+}
 
 if (os.platform() == "win32") {
   gm.subClass({
@@ -102,7 +127,7 @@ function find(outers: any, selector: string, first: boolean) {
 }
 
 
-function rgbToHex(red: any, green: any, blue: any) {
+function rgbToHex(red: any, green: any, blue: any){
 
   var _red = "0" + parseInt(red,16);
   _red = _red.substring(_red.length - 2);
@@ -125,66 +150,328 @@ function strToObj(str: string){
 
 }
 
-gm("src/app/assets/images/for-palette/1.jpg").size(function(err, value){
-  // note : value may be undefined
-  console.log("app.ts: value: ",value);
-})
+function fileExists(filePath: string){
 
-/* gm("src/app/assets/images/for-palette/1.jpg").identify(function(err, value){
-  // note : value may be undefined
-  console.log("app.ts: value: ",value);
-}) */
-
-// SELECTORS
-
-/*const imageContainer = Array.prototype.slice.call(document.querySelectorAll(".image-container"));
-
-imageContainer.map( (element: any, idx: number) => {
-
-  var filepath = "";
-
-  var id = element.getAttribute("id");
-  var currentObj: any = document.getElementById(id); 
-  var namespaceArr = id.split("-");
-  var namespace = 0;
-  if(namespaceArr.length > 0){
-    namespace = namespaceArr[2];
-    if(isNaN(namespace)){
-      namespace = 0;
+  try {
+    if (fs.existsSync(filePath)) {
+      return true;
     }
-  }
-  if(debug){
-    console.log("app.ts: namespace: ",namespace);
+  } catch(err) {
+    return false;
   }
 
-  if(currentObj){
+}
 
-    var _filename: any = currentObj.files[0].name;
-    var _filepath: any = currentObj.files[0].path;
+function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any, namespace: number, fileInputObj: any){
+
+  var filepath = (arguments[0] != null) ? arguments[0] : "";
+  var imageContainer = (arguments[1] != null) ? arguments[1] : null;
+  var imageInfoContainer = (arguments[2] != null) ? arguments[2] : null;
+  var namespace: number = (arguments[3] != null) ? arguments[3] : 0;
+  var fileInputObj = (arguments[4] != null) ? arguments[4] : null;
+
+  if(filepath != "" && imageContainer && imageInfoContainer && !isNaN(namespace) && namespace > 0){
+
+    var _filename: any = "";
+    var _filepath: any = "";
+    var _filenameArr: any = [];
+
+    if(fileInputObj && filepath.indexOf("fakepath") != -1){
+      _filename = fileInputObj.files[0].name;
+      _filepath = fileInputObj.files[0].path;
+    }
+    else{
+      _filenameArr = filepath.split("/");
+      if(_filenameArr.length > 0){
+        _filename = _filenameArr[_filenameArr.length - 1];
+      }
+      else{
+        _filenameArr = filepath.split("\\");
+        if(_filenameArr.length > 0){
+          _filename = _filenameArr[_filenameArr.length - 1];
+        }
+      }
+      _filepath = filepath;
+    }
+
     var _fileextArr: any = _filename.split(".");
     var _fileext: string = "";
     if(_fileextArr.length > 0){
       _fileext = _fileextArr[_fileextArr.length - 1];
     }
-    filepath = _filepath;
-    if(debug){
-      console.log("app.ts: _filename: ",_filename);
-      console.log("app.ts: _filepath: ",_filepath);
-      console.log("app.ts: filepath: ",filepath);
-      console.log("app.ts: _fileextArr: ",_fileextArr);
-      console.log("app.ts: _fileext: ",_fileext);
+
+    var regex = /(jpg|jpeg|JPG|JPEG)/igm;
+    if(_fileext.match(regex)){
+      _fileext = "jpg";
+      //if(debug){
+        console.log("app.ts: writeFiles: _fileext jpg match...");
+      //}
     }
 
-    var outputimageFilename: string = namespace + "_out_image." + _fileext;
+    filepath = _filepath;
 
+    //if(debug){
+      console.log("app.ts: writeFiles: imageContainer: ",imageContainer);
+      console.log("app.ts: writeFiles: imageInfoContainer: ",imageInfoContainer);
+      console.log("app.ts: writeFiles: namespace: ",namespace);
+      console.log("app.ts: writeFiles: filepath: ",filepath);
+      console.log("app.ts: _filepath: ",_filepath);
+      console.log("app.ts: writeFiles: _filenameArr: ",_filenameArr);
+      console.log("app.ts: writeFiles: _filename: ",_filename);
+      console.log("app.ts: writeFiles: _fileextArr: ",_fileextArr);
+      console.log("app.ts: writeFiles: _fileext: ",_fileext);
+    //}
+
+    var outputimageFilename: string = namespace + "_out_image." + _fileext;
+    var histogramFilename: string = namespace + "_histogram.miff";
+
+    var img = gm(filepath);
+
+    var swatches = 0;
+
+    if(store.has('swatches') && !isNaN(store.get('swatches')) && store.get('swatches') > 0){
+      swatches = parseInt(store.get('swatches'));
+    }
+
+    //if(debug){
+      console.log("app.ts: writeFiles: swatches: ",swatches);
+    //}
+
+    /* if(fileExists("src/app/assets/histograms/" + histogramFilename)){
+      fs.unlinkSync("src/app/assets/histograms/" + histogramFilename);
+    } */
+
+    return img.noProfile().bitdepth(8).colors(swatches).write("histogram:src/app/assets/histograms/" + histogramFilename, function (err) {
+
+      addColorSwatchesToPalette(imageInfoContainer, "src/app/assets/histograms/" + histogramFilename,namespace);
+
+      /* if(fileExists("src/app/assets/images/output/" + outputimageFilename)){
+        fs.unlinkSync("src/app/assets/images/output/" + outputimageFilename);
+      } */
+
+      this.write("src/app/assets/images/output/" + outputimageFilename, function (err: any) {
+
+        if(!err){
+          if(debug){
+            console.log("app.ts: output file created");
+          }
+          addImageToImageConatiner(imageContainer, "src/app/assets/images/output/" + outputimageFilename, namespace);
+        }
+
+      });
+
+    });
+    
+  }
+
+}
+
+/* function getNamespace(file: any){
+
+  var file = (arguments[0] != null) ? arguments[0] : null;
+
+  if (file.isFile()){
+    if(debug){
+      console.log("'%s' is a file.", outputDirPath);
+    }
+    var _fileArr: any = file.split("_");
+    if(_fileArr.length > 0){
+      namespace = _fileArr[0];
+    }
+  }
+  else if (stat.isDirectory()){
+    if(debug){
+      console.log("'%s' is a directory.", outputDirPath);
+    }
+  }
+
+} */
+
+function displayImagesAndHistograms(){
+
+  var outputDir = "src/app/assets/images/output/";
+
+  // Loop through all the files in the temp directory
+  fs.readdir(outputDir, function (err, files) {
+
+    if (err) {
+      console.error("Could not list the directory.", err);
+      process.exit(1);
+    }
+
+    files.forEach(function (file, index) {
+      // Make one pass and make the file complete
+      var outputDirPath = path.join(outputDir, file);
+
+      fs.stat(outputDirPath, function (error, stat) {
+
+        if (error) {
+          console.error("Error stating file.", error);
+          return;
+        }
+
+        var namespace = 0;
+
+        if (stat.isFile()){
+          if(debug){
+            console.log("'%s' is a file.", outputDirPath);
+          }
+          var _fileArr: any = file.split("_");
+          if(_fileArr.length > 0){
+            namespace = _fileArr[0];
+          }
+        }
+        else if (stat.isDirectory()){
+          if(debug){
+            console.log("'%s' is a directory.", outputDirPath);
+          }
+        }
+
+        var outputimageFilename: string = file;
+
+        var imageContainer = document.getElementById("image-container-" + namespace);
+
+        addImageToImageConatiner(imageContainer, outputDir + outputimageFilename, namespace);
+
+        var histogramFilename: string = namespace + "_histogram.miff";
+
+        if(fileExists("src/app/assets/histograms/" + histogramFilename)){
+
+          if(debug){
+            console.log("app.ts: files.forEach: namespace: ",namespace);
+          }
+
+          var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
+
+          addColorSwatchesToPalette(imageInfoContainer, "src/app/assets/histograms/" + histogramFilename,namespace);
+
+        }
+
+      });
+
+    });
+
+  });
+
+}
+
+function addImageToImageConatiner(imageContainer: any, src: string, namespace: number){
+
+  var imageContainer = (arguments[0] != null) ? arguments[0] : null;
+  var src: string = (arguments[1] != null) ? arguments[1] : "";
+  var namespace: number = (arguments[2] != null) ? arguments[2] : 0;
+
+  if(imageContainer && src != "" && !isNaN(namespace) && namespace > 0){
+    imageContainer.innerHTML = "";
     var img = document.createElement("img");
     img.setAttribute("id","image-" + namespace);
-    img.setAttribute("src","src/app/assets/images/output/" + outputimageFilename);
+    img.setAttribute("src",src);
     imageContainer.appendChild(img);
+  }
+
+}
+
+function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: string, namespace: number){
+
+  var imageInfoContainer = (arguments[0] != null) ? arguments[0] : null;
+  var histogramFilePath: string = (arguments[1] != null) ? arguments[1] : "";
+  var namespace: number = (arguments[2] != null) ? arguments[2] : 0;
+
+  if(histogramFilePath != ""){
+
+    var rs = fs.createReadStream(histogramFilePath, {encoding: 'utf8'});
+
+    rs.addListener('data', function (chunk) {
+
+      if(debug){
+        //console.log("addColorSwatchesToPalette: chunk: ", chunk);
+      }
+
+      var chunkFormat = chunk.replace(/[\s]+/igm," ");
+      var comment = chunkFormat.replace(/.*(comment[\s]*=[\s]*\{.*\}).*/igm,"$1");
+      comment = comment.replace(/(#[a-zA-Z0-9]{6})/igm,"$1,");
+      comment = comment.replace(/,[\s]*\}/igm," }");
+      comment = comment.replace(/{[\s]*/igm,'{"');
+      comment = comment.replace(/\:/igm,'":');
+      comment = comment.replace(/(#[a-zA-Z0-9]{6}[\s]*,[\s]*)([\d])/igm,'$1"$2');
+      comment = comment.replace(/(#[a-zA-Z0-9]{6})[\s]*,/igm,'$1",');
+      comment = comment.replace(/:[\s]*/igm,':"');
+      comment = comment.replace(/[\s]*\}/igm,'"}');
+      comment = comment.replace(/comment[\s]*=[\s]*/igm,"");
+      comment = comment.replace(/\([\s]*([0-9]+)[\s]*,[\s]*([0-9]+)[\s]*,[\s]*([0-9]+)[\s]*\)/igm,"($1,$2,$3)");
+      if(debug){
+        console.log("addColorSwatchesToPalette: comment: ", comment);
+      }
+      try{
+        comment = JSON.parse(comment);
+      }
+      catch(e){
+        //console.log("addColorSwatchesToPalette: JSON.parse: e: ", e);
+      }
+
+      //if(debug){
+        console.log("addColorSwatchesToPalette: comment: ", comment);
+      //}
+
+      var colors = [];
+
+      for(var key in comment) {
+        var obj: any = {};
+        obj['count'] = key;
+        var valueArr = comment[key].split(" ");
+        var hex = "";
+        if(valueArr.length == 2){
+          hex = valueArr[1];
+        }
+        obj['hex'] = hex;
+        colors.push(obj);
+      }
+
+      colors
+      .sort(
+        ( a: any, b: any ) => {
+          // By using simple subtraction:
+          // --
+          // ( a.count > b.count ) results in negative number.
+          // ( a.count < b.count ) results in positive number.
+          // ( a.count == b.count ) results in zero.
+          return( b.count - a.count );
+        }
+      );
+
+      if(imageInfoContainer){
+
+        if(colors.length > 0){
+
+          imageInfoContainer.innerHTML = "";
+
+          var swatches = 0;
+
+          if(store.has('swatches') && !isNaN(store.get('swatches')) && store.get('swatches') > 0){
+            swatches = parseInt(store.get('swatches'));
+          }
+
+          colors.map( (color: any) => {
+            var div = document.createElement("div");
+            div.setAttribute("id","swatch-" + namespace);
+            div.setAttribute("class","swatch-" + swatches);
+            div.setAttribute("style","background:" + color['hex'] + ";");
+            imageInfoContainer.appendChild(div);
+          });
+
+        }
+
+      }
+
+    });
 
   }
 
-});*/
+}
+
+
+
+// SELECTORS
 
 var templateCount = 10;
 
@@ -228,58 +515,7 @@ if ('content' in document.createElement("template")) {
 
 }
 
-var outputDir = "src/app/assets/images/output/";
-
-// Loop through all the files in the temp directory
-fs.readdir(outputDir, function (err, files) {
-
-  if (err) {
-    console.error("Could not list the directory.", err);
-    process.exit(1);
-  }
-
-  files.forEach(function (file, index) {
-    // Make one pass and make the file complete
-    var outputDirPath = path.join(outputDir, file);
-
-    fs.stat(outputDirPath, function (error, stat) {
-
-      if (error) {
-        console.error("Error stating file.", error);
-        return;
-      }
-
-      var namespace = 0;
-
-      if (stat.isFile()){
-        if(debug){
-          console.log("'%s' is a file.", outputDirPath);
-        }
-        var _fileArr: any = file.split("_");
-        if(_fileArr.length > 0){
-          namespace = _fileArr[0];
-        }
-      }
-      else if (stat.isDirectory()){
-        if(debug){
-          console.log("'%s' is a directory.", outputDirPath);
-        }
-      }
-
-      var outputimageFilename: string = file;
-
-      var imageContainer = document.getElementById("image-container-" + namespace);
-
-      var img = document.createElement("img");
-      img.setAttribute("id","image-" + namespace);
-      img.setAttribute("src",outputDir + outputimageFilename);
-      imageContainer.appendChild(img);
-
-    });
-
-  });
-
-});
+displayImagesAndHistograms();
 
 const fileContainerInner = Array.prototype.slice.call(document.querySelectorAll(".add-image-file-container-inner"));
 
@@ -300,227 +536,26 @@ fileContainerInner.map( (element: any, idx: number) => {
 	var currentObj = document.querySelectorAll("#" + id);
 	
 	var inputfile = find(currentObj,"input[type='file']",true);
-	var inputfilelabel = find(currentObj,"#add-image-inputfile-label",true);
-	var inputfiletextcontainer = find(currentObj,"#add-image-inputfile-text-container",true);
-	var inputfiletext = find(currentObj,"#add-image-inputfile-text",true);
-  var inputfilereset = find(currentObj,"#add-image-inputfile-reset",true);
   var imageContainer = document.getElementById("image-container-" + namespace);
-  
-	if(inputfile > 0 && inputfilelabel > 0 && inputfiletextcontainer > 0 && inputfiletext > 0 && inputfilereset > 0){
-
-	  
-    
-  }
+  var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
 
   inputfile.addEventListener("change",function(event: any){
 
     var filepath = event.target.value;
+
     if(filepath.indexOf("fakepath") != -1){
+
       var id = event.target.getAttribute("id");
       var currentObj: any = document.getElementById(id); 
+
       if(currentObj){
-        var _filename: any = currentObj.files[0].name;
-        var _filepath: any = currentObj.files[0].path;
-        var _fileextArr: any = _filename.split(".");
-        var _fileext: string = "";
-        if(_fileextArr.length > 0){
-          _fileext = _fileextArr[_fileextArr.length - 1];
-        }
-        filepath = _filepath;
-        if(debug){
-          console.log("app.ts: _filename: ",_filename);
-          console.log("app.ts: _filepath: ",_filepath);
-          console.log("app.ts: filepath: ",filepath);
-          console.log("app.ts: _fileextArr: ",_fileextArr);
-          console.log("app.ts: _fileext: ",_fileext);
-        }
 
-        var outputimageFilename: string = namespace + "_out_image." + _fileext;
-        var histogramFilename: string = namespace + "_histogram.miff";
-
-        var img = gm(filepath);
-
-        return img.noProfile().bitdepth(8).colors(50).write("histogram:src/app/assets/histograms/" + histogramFilename, function (err) {
-
-          var histogram, rs;
-          histogram = '';
-          rs = fs.createReadStream("src/app/assets/histograms/" + histogramFilename, {encoding: 'utf8'});
-
-          rs.addListener('data', function (chunk) {
-
-            if(debug){
-              //console.log("Data: ", chunk);
-            }
-
-            var chunkFormat = chunk.replace(/[\s]+/igm," ");
-            var comment = chunkFormat.replace(/.*(comment[\s]*=[\s]*\{.*\}).*/igm,"$1");
-            comment = comment.replace(/(#[a-zA-Z0-9]{6})/igm,"$1,");
-            comment = comment.replace(/,[\s]*\}/igm," }");
-            comment = comment.replace(/{[\s]*/igm,'{"');
-            comment = comment.replace(/\:/igm,'":');
-            comment = comment.replace(/(#[a-zA-Z0-9]{6}[\s]*,[\s]*)([\d])/igm,'$1"$2');
-            comment = comment.replace(/(#[a-zA-Z0-9]{6})[\s]*,/igm,'$1",');
-            comment = comment.replace(/:[\s]*/igm,':"');
-            comment = comment.replace(/[\s]*\}/igm,'"}');
-            comment = comment.replace(/comment[\s]*=[\s]*/igm,"");
-            comment = comment.replace(/\([\s]*([0-9]+)[\s]*,[\s]*([0-9]+)[\s]*,[\s]*([0-9]+)[\s]*\)/igm,"($1,$2,$3)");
-            //comment = comment.replace(/\}/igm,'}}');
-            comment = JSON.parse(comment);
-            //var commentObj = strToObj(comment);
-            //var commentObj = JSON.parse(comment);
-
-            if(debug){
-              console.log("comment: ", comment);
-            }
-
-            var colors = [];
-
-            for(var key in comment) {
-              var obj: any = {};
-              obj['count'] = key;
-              var valueArr = comment[key].split(" ");
-              var hex = "";
-              if(valueArr.length == 2){
-                hex = valueArr[1];
-              }
-              obj['hex'] = hex;
-              colors.push(obj);
-            }
-
-            colors
-            .sort(
-              ( a: any, b: any ) => {
-                // By using simple subtraction:
-                // --
-                // ( a.count > b.count ) results in negative number.
-                // ( a.count < b.count ) results in positive number.
-                // ( a.count == b.count ) results in zero.
-                return( b.count - a.count );
-              }
-            );
-
-            if(debug){
-              console.log("colors: ", colors);
-            }
-
-            /* var regex = /\d+/igm;
-
-            var colors = chunk.split( "\n" )
-            .map(
-              ( line: any ) => {
-                var numbers = line.match(regex);
-                var count = parseInt( numbers[ 0 ] );
-                var red = parseInt( numbers[ 1 ] );
-                var green = parseInt( numbers[ 2 ] );
-                var blue = parseInt( numbers[ 3 ] );
-                return({
-                  count: count,
-                  hex: rgbToHex( red, green, blue )
-                });
-              }
-            )
-            // Sort the colors so that the most frequent colors are listed first.
-            .sort(
-              ( a: any, b: any ) => {
-                // By using simple subtraction:
-                // --
-                // ( a.count > b.count ) results in negative number.
-                // ( a.count < b.count ) results in positive number.
-                // ( a.count == b.count ) results in zero.
-                return( b.count - a.count );
-              }
-            )
-
-            if(debug){
-              console.log("colors: ", colors);
-            } */
-
-          });
-
-          this.write("src/app/assets/images/output/" + outputimageFilename, function (err: any) {
-
-            if(!err){
-              if(debug){
-                console.log("app.ts: output file created");
-              }
-              if(imageContainer){
-                var img = document.createElement("img");
-                img.setAttribute("id","image-" + namespace);
-                img.setAttribute("src","src/app/assets/images/output/" + outputimageFilename);
-                imageContainer.appendChild(img);
-              }
-            }
-
-          });
-
-        })
-        
-
-        /* var readStream = fs.createReadStream(filepath);
-
-        gm(readStream)
-        .size({bufferStream: true}, function(err: any, size: any) {
-
-          this.resize(160,160,"!");
-
-          this.depth({bufferStream: true}, function(err: any, depth: any) {
-
-            this.bitdepth(8);
-
-            this.color({bufferStream: true}, function(err: any, color: any) {
-
-              this.background("#ffffff");
-              this.dither(true);
-              this.matte();
-              this.colorspace("rgb");
-              this.colors(50);
-
-              var outputimageFilename: string = namespace + "_out_image." + _fileext;
-              var histogramFilename: string = namespace + "_histogram.miff";
-              this.write("src/app/assets/images/output/" + outputimageFilename, function (err: any) {
-
-                if(!err){
-                  if(debug){
-                    console.log("app.ts: output file created");
-                  }
-                  if(imageContainer){
-                    var img = document.createElement("img");
-                    img.setAttribute("id","image-" + namespace);
-                    img.setAttribute("src","src/app/assets/images/output/" + outputimageFilename);
-                    imageContainer.appendChild(img);
-                  }
-                }
-
-                gm("src/app/assets/images/output/" + outputimageFilename).command("convert").write("src/app/assets/histograms/" + histogramFilename, function (err: any) {
-
-                  if(!err){
-                    if(debug){
-                      console.log("app.ts: histogram created");
-                    }
-                  }
-
-                  gm("src/app/assets/histograms/" + histogramFilename).identify('%c', function (err: any, format: any) {
-
-                    if(!err){
-                      if(debug){
-                        console.log("app.ts: format: ",format);
-                      }
-                    }
-
-                  });
-
-                });
-
-              });
-
-            });
-
-          });
-
-        }); */
+        writeFiles(filepath, imageContainer, imageInfoContainer, namespace, currentObj);
 
       }
+
     }
+
     if(debug){
       console.log("app.ts: filepath: ",filepath);
     }
@@ -528,5 +563,123 @@ fileContainerInner.map( (element: any, idx: number) => {
   });
 
 });
+
+const button = Array.prototype.slice.call(document.querySelectorAll(".button"));
+
+button.map( (element: any, idx: number) => {
+
+  element.addEventListener("click",function(event: any){
+
+    var _element = event.currentTarget;
+
+    if(debug){
+      console.log("app.ts: _element: ",_element);
+    }
+
+    var dataRoleQuantity = _element.getAttribute("data-role-quantity");
+
+    if(debug){
+      console.log("app.ts: dataRoleQuantity: ",dataRoleQuantity);
+    }
+
+    button.map( (element: any, idx: number) => {
+      element.classList.remove("current");
+    });
+
+    _element.classList.add("current");
+
+    if (typeof dataRoleQuantity !== typeof undefined && dataRoleQuantity !== false) {
+
+      
+
+      if(store.has('swatches')){
+
+        //var reset = store.get('swatches') == dataRoleQuantity ? false : true;
+
+        //if(reset){
+
+          store.set('swatches',dataRoleQuantity);
+
+          //if(debug){
+            console.log("app.ts: button.map: store.get('swatches'): ",store.get('swatches'));
+          //}
+
+          var outputDir = "src/app/assets/images/output/";
+
+          // Loop through all the files in the temp directory
+          fs.readdir(outputDir, function (err, files) {
+
+            if (err) {
+              console.error("app.ts: button.map: Could not list the directory.", err);
+              process.exit(1);
+            }
+
+            files.forEach(function (file, index) {
+
+              // Make one pass and make the file complete
+              var outputDirPath = path.join(outputDir, file);
+
+              fs.stat(outputDirPath, function (error, stat) {
+
+                if (error) {
+                  console.error("app.ts: button.map: Error stating file.", error);
+                  return;
+                }
+        
+                var namespace = 0;
+        
+                if (stat.isFile()){
+                  if(debug){
+                    console.log("app.ts: button.map: '%s' is a file: ", outputDirPath);
+                  }
+                  var _fileArr: any = file.split("_");
+                  if(_fileArr.length > 0){
+                    namespace = _fileArr[0];
+                  }
+                }
+                else if (stat.isDirectory()){
+                  if(debug){
+                    console.log("app.ts: button.map: '%s' is a directory: ", outputDirPath);
+                  }
+                }
+        
+                var outputimageFilename: string = file;
+                //if(debug){
+                  console.log("app.ts: button.map: outputimageFilename: ", outputimageFilename);
+                //}
+                var imageContainer = document.getElementById("image-container-" + namespace);
+                var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
+
+                writeFiles(outputimageFilename, imageContainer, imageInfoContainer, namespace, null);
+
+              });
+
+
+            });
+
+          });
+
+
+        //}
+
+      }
+    }
+
+  },false);
+
+});
+
+var swatches = 0;
+
+if(store.has('swatches') && !isNaN(store.get('swatches')) && store.get('swatches') > 0){
+  swatches = parseInt(store.get('swatches'));
+}
+
+if (swatches > 0) {
+  var colorQuantity = document.getElementById("color-quantity-" + swatches);
+  if(colorQuantity){
+    colorQuantity.classList.add("current");
+  }
+}
 
 

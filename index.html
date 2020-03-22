@@ -16,17 +16,21 @@
           font-family: Arial, Helvetica, sans-serif;
       }
 
+      body {
+        background: rgba(0,0,0,0.75);
+      }
+
       .content { 
           width: 100%;
           height: 100vh;
-          background: rgba(0,0,0,0.75);
       }
         
       h1 {
+          position: relative;
           width: 100%;
-          color: rgba(255,255,255555555555,1);
+          color: rgba(255,255,255,1);
           text-align: center;
-          padding: 20px;
+          padding: 20px 60px;
       }
 
       .wrapper {
@@ -37,19 +41,19 @@
       .container {
           display: flex;
           flex-wrap: wrap;
-          justify-content: flex-start;
+          justify-content: center;
       }
 
       .palette {
-        width: 200px;
-        height: 384px;
+        width: 300px;
+        height: 484px;
         margin-right: 20px;
         margin-bottom: 20px;
       }
 
       .image-container {
-          width: 200px;
-          height: 184px;
+          width: 300px;
+          height: 234px;
           border-top: 20px solid rgba(0,0,0,0.075);
           border-left: 20px solid rgba(0,0,0,0.075);
           border-right: 20px solid rgba(0,0,0,0.075);
@@ -59,27 +63,50 @@
 
       .image-container img {
           width: 100%;
-          height: 184px;
+          height: 234px;
       }
 
       .palette-image {
           position: relative;
-          width: 200px;
-          height: 200px;
+          width: 300px;
+          height: 250px;
           padding: 20px;
           background: rgba(0,0,0,0.075);
           box-sizing: border-box;
       }
 
       .image-info-container {
-        height: 84px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        height: 134px;
         background: rgba(255,255,255,0.075);
         /* border: 1px solid red; */
         margin-bottom: 46px;
         color: white;
-        padding: 20px;
+        padding: 10px;
         box-sizing: border-box;
         overflow: hidden;
+      }
+
+      .swatch-25 {
+        width: 25px;
+        height: 25px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+        border-radius: 4px;
+      }
+
+      .swatch-0, .swatch-50 {
+        width: 20px;
+        height: 20px;
+        margin-right: 4px;
+        margin-bottom: 4px;
+        border-radius: 3px;
+      }
+
+      .swatch:last-child {
+        margin-right: 0px;
       }
 
       button {
@@ -114,17 +141,17 @@
         width: initial !important;
         top: 0px;
         left: 0px;
-          color: white;
-          color: #ffffff;
+        color: white;
+        color: #ffffff;
         padding: 6px 12px !important;
-          margin: 0px;
+        margin: 0px;
         border: 1px solid #bbbbbb;
-          font-size: 14px;
+        font-size: 14px;
         font-weight: normal;
-          line-height: 20px;
-          text-align: center;
-          vertical-align: middle;
-          cursor: pointer;
+        line-height: 20px;
+        text-align: center;
+        vertical-align: middle;
+        cursor: pointer;
         text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
         background-color: #333333;
         background-image: -moz-linear-gradient(top, #333333, #1a1a1a);
@@ -178,49 +205,83 @@
         cursor: pointer;
       }
 
+      .button {
+        width: 110px;
+        height: 50px;
+        background: rgba(255,255,255,0.075);
+        border-radius: 25px;
+        padding: 10px 10px 10px 50px;
+        box-sizing: border-box;
+        color:rgba(255,255,255,0.5);
+        font-family: Arial, Helvetica, sans-serif;
+        cursor: pointer;
+      }
+
+      .button:hover, .button.current {
+        background: rgba(0,0,0,1);
+      }
+
+      .button:hover img, .button.current img {
+        background: rgba(255,255,255,0.25);
+      }
+
+
+
+      .button:nth-of-type(1) {
+        position: absolute;
+        top: 15px;
+        left: 60px;
+      }
+
+      .button:nth-of-type(2) {
+        position: absolute;
+        top: 15px;
+        left: 190px;
+      }
+
+      .button:nth-of-type(3) {
+        position: absolute;
+        top: 15px;
+        left: 330px;
+      }
+
+      .button:nth-of-type(4) {
+        position: absolute;
+        top: 15px;
+        left: 480px;
+      }
+
+      .button  img {
+        position: absolute;
+        left: 10px;
+        background: rgba(255,255,255,0.075);
+        border-radius: 25px;
+      }
+
+      .button  span {
+        position: relative;
+        top: -3px;
+      }
+
     </style>
 
   </head>
 
   <body>
 
-    <!-- <button id="request-os-info">Request OS Info</button>
-    <div id="request-os-info-container"></div> -->
-
     <main class="content">
   
-      <h1>Color Palette</h1>
+      <h1>
+        <div id="color-quantity-5" data-role-quantity="5" class="button"><img src="src/app/assets/svg/mdi-palette.svg" /><span>5</span></div>
+        <div id="color-quantity-10" data-role-quantity="10" class="button"><img src="src/app/assets/svg/mdi-palette.svg" /><span>10</span></div>
+        <div id="color-quantity-25" data-role-quantity="25" class="button"><img src="src/app/assets/svg/mdi-palette.svg" /><span>25</span></div>
+        <div id="color-quantity-50" data-role-quantity="50" class="button"><img src="src/app/assets/svg/mdi-palette.svg" /><span>50</span></div>
+        Color Palette
+      </h1>
 
       <div class="wrapper">
   
         <div id="container" class="container">
-    
-          <!-- <div class="palette"> 
-            <div id="image-container-0" class="image-container">
-              <img id="image-0" src="src/app/assets/images/for-palette/1.jpg" />
-            </div>
-            <div id="palette-image-0" class="palette-image">
-              <div id="image-0-info-container" class="image-info-container"></div>
-            </div>
-          </div> -->
-
-          <!-- <div class="palette"> 
-            <div id="image-container-1" class="image-container">
-            </div>
-            <div id="palette-image-1" class="palette-image">
-              <div id="image-info-container-1" class="image-info-container"></div>
-              <div id="add-image-file-container-inner-1" class="add-image-file-container-inner">
-                <input type="file" name="imagefile" id="imagefile-1" class="inputfile" data-label="Attachment" data-required="false" data-validate="Regex" data-regex="(.*)(\.)(jpg|JPG|png|PNG)$" data-message="Please use a file format of either JPG or PNG" accept=".jpg,.jpeg,.png" value="">
-                <label for="imagefile" id="add-image-inputfile-label-1" class="label3">
-                  Choose a file
-                </label>
-                <span id="add-image-inputfile-text-container-1" class="inputfile-text-container" style="display:none;">
-                  <span id="add-image-inputfile-text-1" class="inputfile-text"></span>
-                  <i id="add-image-inputfile-reset-1" class="fa fa-times inputfile-reset"></i>
-                </span>
-              </div>
-            </div>
-          </div> -->
 
           <template id="palette">
             <div class="palette"> 
