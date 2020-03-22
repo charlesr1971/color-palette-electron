@@ -17,6 +17,9 @@ var debug = false;
 
 var imageHandler = null;
 
+var swatchQtyAscArr = [5,10,25,50];
+var swatchQtyDescArr = swatchQtyAscArr.reverse();
+
 const store = new Store();
 
 if(!store.has('swatches')){
@@ -203,14 +206,14 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
     var regex = /(jpg|jpeg|JPG|JPEG)/igm;
     if(_fileext.match(regex)){
       _fileext = "jpg";
-      //if(debug){
+      if(debug){
         console.log("app.ts: writeFiles: _fileext jpg match...");
-      //}
+      }
     }
 
     filepath = _filepath;
 
-    //if(debug){
+    if(debug){
       console.log("app.ts: writeFiles: imageContainer: ",imageContainer);
       console.log("app.ts: writeFiles: imageInfoContainer: ",imageInfoContainer);
       console.log("app.ts: writeFiles: namespace: ",namespace);
@@ -220,7 +223,7 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
       console.log("app.ts: writeFiles: _filename: ",_filename);
       console.log("app.ts: writeFiles: _fileextArr: ",_fileextArr);
       console.log("app.ts: writeFiles: _fileext: ",_fileext);
-    //}
+    }
 
     var outputimageFilename: string = namespace + "_out_image." + _fileext;
     var histogramFilename: string = namespace + "_histogram.miff";
@@ -233,9 +236,9 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
       swatches = parseInt(store.get('swatches'));
     }
 
-    //if(debug){
+    if(debug){
       console.log("app.ts: writeFiles: swatches: ",swatches);
-    //}
+    }
 
     /* if(fileExists("src/app/assets/histograms/" + histogramFilename)){
       fs.unlinkSync("src/app/assets/histograms/" + histogramFilename);
@@ -365,7 +368,7 @@ function addImageToImageConatiner(imageContainer: any, src: string, namespace: n
     imageContainer.innerHTML = "";
     var img = document.createElement("img");
     img.setAttribute("id","image-" + namespace);
-    img.setAttribute("src",src);
+    img.setAttribute("src",src + "?" + new Date().getTime());
     imageContainer.appendChild(img);
   }
 
@@ -409,9 +412,9 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
         //console.log("addColorSwatchesToPalette: JSON.parse: e: ", e);
       }
 
-      //if(debug){
+      if(debug){
         console.log("addColorSwatchesToPalette: comment: ", comment);
-      //}
+      }
 
       var colors = [];
 
@@ -443,6 +446,10 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
 
         if(colors.length > 0){
 
+          if(debug){
+            console.log("addColorSwatchesToPalette: colors.length: ", colors.length);
+          }
+
           imageInfoContainer.innerHTML = "";
 
           var swatches = 0;
@@ -451,10 +458,26 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
             swatches = parseInt(store.get('swatches'));
           }
 
+          var colorsQty = 0;
+
+          if(debug){
+            console.log("addColorSwatchesToPalette: swatchQtyDescArr: ", swatchQtyDescArr);
+          }
+
+          swatchQtyDescArr.map( (qty) => {
+            if(colors.length <= qty){
+              colorsQty = qty;
+            }
+          });
+          
+          if(debug){
+            console.log("addColorSwatchesToPalette: colorsQty: ", colorsQty);
+          }
+
           colors.map( (color: any) => {
             var div = document.createElement("div");
             div.setAttribute("id","swatch-" + namespace);
-            div.setAttribute("class","swatch-" + swatches);
+            div.setAttribute("class","swatch-" + colorsQty);
             div.setAttribute("style","background:" + color['hex'] + ";");
             imageInfoContainer.appendChild(div);
           });
@@ -590,77 +613,13 @@ button.map( (element: any, idx: number) => {
 
     if (typeof dataRoleQuantity !== typeof undefined && dataRoleQuantity !== false) {
 
-      
-
       if(store.has('swatches')){
 
-        //var reset = store.get('swatches') == dataRoleQuantity ? false : true;
+        store.set('swatches',dataRoleQuantity);
 
-        //if(reset){
-
-          store.set('swatches',dataRoleQuantity);
-
-          //if(debug){
-            console.log("app.ts: button.map: store.get('swatches'): ",store.get('swatches'));
-          //}
-
-          var outputDir = "src/app/assets/images/output/";
-
-          // Loop through all the files in the temp directory
-          fs.readdir(outputDir, function (err, files) {
-
-            if (err) {
-              console.error("app.ts: button.map: Could not list the directory.", err);
-              process.exit(1);
-            }
-
-            files.forEach(function (file, index) {
-
-              // Make one pass and make the file complete
-              var outputDirPath = path.join(outputDir, file);
-
-              fs.stat(outputDirPath, function (error, stat) {
-
-                if (error) {
-                  console.error("app.ts: button.map: Error stating file.", error);
-                  return;
-                }
-        
-                var namespace = 0;
-        
-                if (stat.isFile()){
-                  if(debug){
-                    console.log("app.ts: button.map: '%s' is a file: ", outputDirPath);
-                  }
-                  var _fileArr: any = file.split("_");
-                  if(_fileArr.length > 0){
-                    namespace = _fileArr[0];
-                  }
-                }
-                else if (stat.isDirectory()){
-                  if(debug){
-                    console.log("app.ts: button.map: '%s' is a directory: ", outputDirPath);
-                  }
-                }
-        
-                var outputimageFilename: string = file;
-                //if(debug){
-                  console.log("app.ts: button.map: outputimageFilename: ", outputimageFilename);
-                //}
-                var imageContainer = document.getElementById("image-container-" + namespace);
-                var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
-
-                writeFiles(outputimageFilename, imageContainer, imageInfoContainer, namespace, null);
-
-              });
-
-
-            });
-
-          });
-
-
-        //}
+        if(debug){
+          console.log("app.ts: button.map: store.get('swatches'): ",store.get('swatches'));
+        }
 
       }
     }
