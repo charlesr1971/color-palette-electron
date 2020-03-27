@@ -20,7 +20,8 @@
     "extends": null,
     "files": [
       "./index.html",
-      "./dist/**/*"
+      "./dist/**/*",
+      "./dist/app/assets/**"
     ]
   },
   "scripts": {
