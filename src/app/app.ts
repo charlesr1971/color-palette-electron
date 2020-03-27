@@ -1,4 +1,4 @@
-import {IpcService} from "./IpcService";
+import { IpcService } from "./IpcService";
 import AppPaths from './AppPaths';
 
 import * as path from 'path';
@@ -96,6 +96,8 @@ if (os.platform() == "win32") {
     appPath: AppPaths.replaceAsar(path.join(imagemagick.path, "/"))
   })
 }
+
+console.log(process.env);
 
 // METHODS
 
@@ -640,5 +642,6 @@ if (swatches > 0) {
     colorQuantity.classList.add("current");
   }
 }
+
 
 

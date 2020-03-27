@@ -1,6 +1,6 @@
-import {IpcChannelInterface} from "./IpcChannelInterface";
-import {IpcMainEvent} from 'electron';
-import {IpcRequest} from "../../shared/IpcRequest";
+import { IpcChannelInterface } from "./IpcChannelInterface";
+import { IpcMainEvent } from 'electron';
+import { IpcRequest } from "../../shared/IpcRequest";
 import * as gm from "gm";
 import {execSync} from "child_process";
 
