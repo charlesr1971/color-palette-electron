@@ -6,6 +6,8 @@ import {execSync} from "child_process";
 
 export class ImageInfoChannel implements IpcChannelInterface {
 
+  rootDir = "dist";
+
   getName(): string {
     return 'image-info';
   }
@@ -15,9 +17,7 @@ export class ImageInfoChannel implements IpcChannelInterface {
       request.responseChannel = `${this.getName()}_response`;
     }
     let size = null;
-    gm("src/app/assets/images/for-palette/1.jpg").size(function(err, value){
-      // note : value may be undefined
-      //console.log("ImageInfoChannel: handle: value: ",value);
+    gm(this.rootDir + "/app/assets/images/for-palette/1.jpg").size(function(err, value){
       size = value;
     })
     event.sender.send(request.responseChannel, { size: size });

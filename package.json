@@ -6,6 +6,7 @@
   "version": "1.0.0",
   "homepage": ".",
   "main": "./dist/electron/main.js",
+  "types": "./src/typings.d.ts",
   "build": {
     "asar": true,
     "asarUnpack": [
@@ -24,14 +25,15 @@
     ]
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy:assets",
     "watch": "tsc -w",
     "start": "npm run build && electron ./dist/electron/main.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "pack": "electron-builder --windows",
     "electron:build": "npm run build && electron ./dist/electron/main.js && electron-builder --windows",
     "electron:pack": "electron-builder --prepackaged ./dist/win-unpacked --windows",
-    "postinstall": "electron-builder install-app-deps"
+    "postinstall": "electron-builder install-app-deps",
+    "copy:assets": "cpx ./src/app/assets/** ./dist/app/assets"
   },
   "devDependencies": {
     "@types/electron": "^1.6.10",
@@ -41,6 +43,7 @@
     "typescript": "^3.7.3"
   },
   "dependencies": {
+    "cpx": "^1.5.0",
     "electron-root-path": "^1.0.16",
     "electron-store": "^5.1.1",
     "gm": "^1.23.1",

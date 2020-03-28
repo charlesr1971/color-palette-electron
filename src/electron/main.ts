@@ -11,6 +11,8 @@ class Main {
 
   private mainWindow: BrowserWindow | undefined;
 
+  public debug: boolean = false;
+
   public init(ipcChannels: IpcChannelInterface[]) {
     app.on('ready', this.createWindow);
     app.on('window-all-closed', this.onWindowAllClosed);
@@ -41,19 +43,18 @@ class Main {
       }
     });
     this.mainWindow.webContents.openDevTools();
-    const isDev = process.env.npm_lifecycle_event == "start" ? true : false;
     let isPackaged: boolean = false;
     if(process.mainModule){
       isPackaged = process.mainModule.filename.indexOf('app.asar') !== -1;
     }
     const location = path.join(rootPath, 'resources/app.asar/index.html');
-    //const location = path.resolve('../../index.html');
-    console.log("main.ts: createWindow: process.env: ",process.env);
-    console.log("main.ts: createWindow: process.mainModule: ",process.mainModule);
-    console.log("main.ts: createWindow: isPackaged: ",isPackaged);
-    console.log("main.ts: createWindow: location: ",location);
+    if(this.debug){
+      console.log("main.ts: createWindow: process.env: ",process.env);
+      console.log("main.ts: createWindow: process.mainModule: ",process.mainModule);
+      console.log("main.ts: createWindow: isPackaged: ",isPackaged);
+      console.log("main.ts: createWindow: location: ",location);
+    }
     if(isPackaged){
-      //this.mainWindow.loadFile('file://' + __dirname + '/index.html');
       this.mainWindow.loadFile(location);
     }
     else{

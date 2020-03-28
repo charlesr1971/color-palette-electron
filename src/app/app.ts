@@ -15,7 +15,16 @@ import * as Store from "electron-store";
 
 var debug = false;
 
-var imageHandler = null;
+var rootDir = "dist";
+
+let isPackaged: boolean = false;
+if(process.mainModule){
+  isPackaged = process.mainModule.filename.indexOf('app.asar') !== -1;
+}
+
+if(isPackaged){
+  rootDir = "resources/app.asar/dist";
+}
 
 var swatchQtyAscArr = [5,10,25,50];
 var swatchQtyDescArr = swatchQtyAscArr.reverse();
@@ -242,25 +251,17 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
       console.log("app.ts: writeFiles: swatches: ",swatches);
     }
 
-    /* if(fileExists("src/app/assets/histograms/" + histogramFilename)){
-      fs.unlinkSync("src/app/assets/histograms/" + histogramFilename);
-    } */
+    return img.noProfile().bitdepth(8).colors(swatches).write("histogram:" + rootDir + "/app/assets/histograms/" + histogramFilename, function (err) {
 
-    return img.noProfile().bitdepth(8).colors(swatches).write("histogram:src/app/assets/histograms/" + histogramFilename, function (err) {
+      addColorSwatchesToPalette(imageInfoContainer, rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
 
-      addColorSwatchesToPalette(imageInfoContainer, "src/app/assets/histograms/" + histogramFilename,namespace);
-
-      /* if(fileExists("src/app/assets/images/output/" + outputimageFilename)){
-        fs.unlinkSync("src/app/assets/images/output/" + outputimageFilename);
-      } */
-
-      this.write("src/app/assets/images/output/" + outputimageFilename, function (err: any) {
+      this.write(rootDir + "/app/assets/images/output/" + outputimageFilename, function (err: any) {
 
         if(!err){
           if(debug){
             console.log("app.ts: output file created");
           }
-          addImageToImageConatiner(imageContainer, "src/app/assets/images/output/" + outputimageFilename, namespace);
+          addImageToImageConatiner(imageContainer, rootDir + "/app/assets/images/output/" + outputimageFilename, namespace);
         }
 
       });
@@ -271,30 +272,9 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
 
 }
 
-/* function getNamespace(file: any){
-
-  var file = (arguments[0] != null) ? arguments[0] : null;
-
-  if (file.isFile()){
-    if(debug){
-      console.log("'%s' is a file.", outputDirPath);
-    }
-    var _fileArr: any = file.split("_");
-    if(_fileArr.length > 0){
-      namespace = _fileArr[0];
-    }
-  }
-  else if (stat.isDirectory()){
-    if(debug){
-      console.log("'%s' is a directory.", outputDirPath);
-    }
-  }
-
-} */
-
 function displayImagesAndHistograms(){
 
-  var outputDir = "src/app/assets/images/output/";
+  var outputDir = rootDir + "/app/assets/images/output/";
 
   // Loop through all the files in the temp directory
   fs.readdir(outputDir, function (err, files) {
@@ -340,7 +320,7 @@ function displayImagesAndHistograms(){
 
         var histogramFilename: string = namespace + "_histogram.miff";
 
-        if(fileExists("src/app/assets/histograms/" + histogramFilename)){
+        if(fileExists(rootDir + "/app/assets/histograms/" + histogramFilename)){
 
           if(debug){
             console.log("app.ts: files.forEach: namespace: ",namespace);
@@ -348,7 +328,7 @@ function displayImagesAndHistograms(){
 
           var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
 
-          addColorSwatchesToPalette(imageInfoContainer, "src/app/assets/histograms/" + histogramFilename,namespace);
+          addColorSwatchesToPalette(imageInfoContainer, rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
 
         }
 
@@ -624,9 +604,35 @@ button.map( (element: any, idx: number) => {
         }
 
       }
+
     }
 
   },false);
+
+});
+
+button.map( (element: any, idx: number) => {
+
+  if(debug){
+    console.log("app.ts: element: ",element);
+  }
+
+  var dataRoleQuantity = element.getAttribute("data-role-quantity");
+
+  if(debug){
+    console.log("app.ts: dataRoleQuantity: ",dataRoleQuantity);
+  }
+
+  if (typeof dataRoleQuantity !== typeof undefined && dataRoleQuantity !== false) {
+
+    var src = rootDir + "/app/assets/svg/mdi-palette.svg";
+
+    var img = document.createElement("img");
+    img.setAttribute("id","image-quantity-" + dataRoleQuantity);
+    img.setAttribute("src",src);
+    element.appendChild(img);
+
+  }
 
 });
 
