@@ -419,6 +419,11 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
         var obj: any = {};
         obj['count'] = key;
         var valueArr = comment[key].split(" ");
+        var rgb = "";
+        if(valueArr.length > 0){
+          rgb = valueArr[0];
+        }
+        obj['rgb'] = "rgb" + rgb;
         var hex = "";
         if(valueArr.length == 2){
           hex = valueArr[1];
@@ -443,9 +448,10 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
 
         if(colors.length > 0){
 
-          if(debug){
+          //if(debug){
             console.log("addColorSwatchesToPalette: colors.length: ", colors.length);
-          }
+            console.log("addColorSwatchesToPalette: colors: ", colors);
+          //}
 
           imageInfoContainer.innerHTML = "";
 
@@ -471,11 +477,34 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
             console.log("addColorSwatchesToPalette: colorsQty: ", colorsQty);
           }
 
+          var imageDataContainer = document.querySelector("#image-data-container-" + namespace);
+
+          
+
           colors.map( (color: any) => {
             var div = document.createElement("div");
             div.setAttribute("id","swatch-" + namespace);
             div.setAttribute("class","swatch-" + colorsQty);
             div.setAttribute("style","background:" + color['hex'] + ";");
+            if(imageDataContainer){
+              div.addEventListener("mouseover", function(event: any){
+                imageDataContainer.innerHTML = "";
+                var src = $src + "/app/assets/svg/mdi-close.svg";
+                var img = document.createElement("img");
+                img.setAttribute("src",src);
+                img.addEventListener("click", function(event: any){
+                  imageDataContainer.innerHTML = "";
+                });
+                imageDataContainer.appendChild(img);
+                var span = document.createElement("span");
+                var newtext = document.createTextNode(color['hex']);
+                span.appendChild(newtext);
+                imageDataContainer.appendChild(span);
+              });
+              div.addEventListener("click", function(event: any){
+                imageDataContainer.innerHTML = '<div>' + color['hex'] + '</div><div>' + color['rgb'] + '</div>';
+              });
+            }
             imageInfoContainer.appendChild(div);
           });
 
@@ -514,6 +543,8 @@ if ('content' in document.createElement("template")) {
       paletteImage.setAttribute("id","palette-image-" + namespace);
       var imageInfoContainer = clone.querySelector("#image-info-container-0");
       imageInfoContainer.setAttribute("id","image-info-container-" + namespace);
+      var imageDataContainer = clone.querySelector("#image-data-container-0");
+      imageDataContainer.setAttribute("id","image-data-container-" + namespace);
       var addImageFileContainerInner = clone.querySelector("#add-image-file-container-inner-0");
       addImageFileContainerInner.setAttribute("id","add-image-file-container-inner-" + namespace);
       var imagefile = clone.querySelector("#imagefile-0");

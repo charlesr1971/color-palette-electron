@@ -49,7 +49,7 @@
 
       .palette {
         width: 300px;
-        height: 484px;
+        height: 584px;
         margin-right: 20px;
         margin-bottom: 20px;
       }
@@ -72,7 +72,7 @@
       .palette-image {
           position: relative;
           width: 300px;
-          height: 250px;
+          height: 350px;
           padding: 20px;
           background: rgba(0,0,0,0.075);
           box-sizing: border-box;
@@ -86,11 +86,55 @@
         height: 134px;
         background: rgba(255,255,255,0.075);
         /* border: 1px solid red; */
-        margin-bottom: 46px;
+        margin-bottom: 20px;
         color: white;
         padding: 10px;
         box-sizing: border-box;
         overflow: hidden;
+      }
+
+      .image-data-container {
+        position: relative;
+        display: block;
+        align-content: center;
+        height: 106px;
+        background: rgba(255,255,255,0.075);
+        margin-bottom: 20px;
+        padding: 10px;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .image-data-container span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%,-50%);
+        color: white;
+        font-size: 32px;
+      }
+
+      .image-data-container img {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 18px;
+      }
+
+      .image-data-container div {
+        height: 38px;
+        background: rgba(255,255,255,0.1);
+        font-size: 18px;
+        padding: 10px 0px;
+        color: white;
+        margin-bottom: 10px;
+        text-align: center;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+
+      .image-data-container div:nth-of-type(2) {
+        margin-bottom: 0px;
       }
 
       .swatch-5 {
@@ -292,10 +336,6 @@
     <main class="content">
   
       <h1>
-        <!-- <div id="color-quantity-5" data-role-quantity="5" class="button"><img id="img-quantity-5" src="dist/app/assets/svg/mdi-palette.svg" /><span>5</span></div>
-        <div id="color-quantity-10" data-role-quantity="10" class="button"><img id="img-quantity-10" src="dist/app/assets/svg/mdi-palette.svg" /><span>10</span></div>
-        <div id="color-quantity-25" data-role-quantity="25" class="button"><img id="img-quantity-25" src="dist/app/assets/svg/mdi-palette.svg" /><span>25</span></div>
-        <div id="color-quantity-50" data-role-quantity="50" class="button"><img id="img-quantity-50" src="dist/app/assets/svg/mdi-palette.svg" /><span>50</span></div> -->
         <div id="color-quantity-5" data-role-quantity="5" class="button"><span>5</span></div>
         <div id="color-quantity-10" data-role-quantity="10" class="button"><span>10</span></div>
         <div id="color-quantity-25" data-role-quantity="25" class="button"><span>25</span></div>
@@ -313,6 +353,7 @@
               </div>
               <div id="palette-image-0" class="palette-image">
                 <div id="image-info-container-0" class="image-info-container"></div>
+                <div id="image-data-container-0" class="image-data-container"></div>
                 <div id="add-image-file-container-inner-0" class="add-image-file-container-inner">
                   <input type="file" name="imagefile" id="imagefile-0" class="inputfile" data-label="Attachment" data-required="false" data-validate="Regex" data-regex="(.*)(\.)(jpg|JPG|png|PNG)$" data-message="Please use a file format of either JPG or PNG" accept=".jpg,.jpeg,.png" value="">
                   <label for="imagefile" id="add-image-inputfile-label-0" class="label3">
