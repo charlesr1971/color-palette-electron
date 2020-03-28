@@ -1,6 +1,6 @@
 {
-  "name": "colorpalette",
-  "description": "Color Palette",
+  "name": "colorpalette-v1-0-0",
+  "description": "Color Palette v1.0",
   "author": "Charles Robertson <http://www.mushroom.man>",
   "license": "MIT",
   "version": "1.0.0",
@@ -13,7 +13,7 @@
       "./node_modules/graphicsmagick-static/bin/**",
       "./node_modules/imagemagick-darwin-static/bin/**"
     ],
-    "appId": "com.colorpalette.app",
+    "appId": "com.colorpalettev1_0_0.app",
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico"
@@ -22,7 +22,8 @@
     "files": [
       "./index.html",
       "./dist/**/*"
-    ]
+    ],
+    "extraResources": "./dist/app/assets"
   },
   "scripts": {
     "build": "tsc && npm run copy:assets",

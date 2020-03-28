@@ -37,12 +37,13 @@ class Main {
     this.mainWindow = new BrowserWindow({
       height: 600,
       width: 800,
+      fullscreen: true,
       title: `Yet another Electron Application`,
       webPreferences: {
         nodeIntegration: true
       }
     });
-    this.mainWindow.webContents.openDevTools();
+    //this.mainWindow.webContents.openDevTools();
     let isPackaged: boolean = false;
     if(process.mainModule){
       isPackaged = process.mainModule.filename.indexOf('app.asar') !== -1;

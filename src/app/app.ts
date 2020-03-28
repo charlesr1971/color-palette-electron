@@ -1,5 +1,8 @@
+
 import { IpcService } from "./IpcService";
 import AppPaths from './AppPaths';
+
+import * as electron from 'electron';
 
 import * as path from 'path';
 import * as imagemagick from 'imagemagick-darwin-static';
@@ -15,15 +18,26 @@ import * as Store from "electron-store";
 
 var debug = false;
 
-var rootDir = "dist";
+var $rootDir = "dist";
+var $src = $rootDir;
 
-let isPackaged: boolean = false;
-if(process.mainModule){
-  isPackaged = process.mainModule.filename.indexOf('app.asar') !== -1;
-}
+const configDir =  (electron.app || electron.remote.app).getPath('userData');
+const appDir =  (electron.app || electron.remote.app).getAppPath();
+
+const  isPackaged = appDir.indexOf('app.asar') !== -1;
 
 if(isPackaged){
-  rootDir = "resources/app.asar/dist";
+  $rootDir = "resources/dist";
+  var regex = /(.*)app.asar.*/igm;
+  $src = appDir.replace(regex,"$1") + "dist";
+}
+
+if(debug){
+  console.log('app.ts: configDir: ',configDir);
+  console.log('app.ts: appDir: ',appDir);
+  console.log('app.ts: isPackaged: ',isPackaged);
+  console.log('app.ts: $rootDir: ',$rootDir);
+  console.log('app.ts: $src: ',$src);
 }
 
 var swatchQtyAscArr = [5,10,25,50];
@@ -251,17 +265,17 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
       console.log("app.ts: writeFiles: swatches: ",swatches);
     }
 
-    return img.noProfile().bitdepth(8).colors(swatches).write("histogram:" + rootDir + "/app/assets/histograms/" + histogramFilename, function (err) {
+    return img.noProfile().bitdepth(8).colors(swatches).write("histogram:" + $rootDir + "/app/assets/histograms/" + histogramFilename, function (err) {
 
-      addColorSwatchesToPalette(imageInfoContainer, rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
+      addColorSwatchesToPalette(imageInfoContainer, $rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
 
-      this.write(rootDir + "/app/assets/images/output/" + outputimageFilename, function (err: any) {
+      this.write($rootDir + "/app/assets/images/output/" + outputimageFilename, function (err: any) {
 
         if(!err){
           if(debug){
             console.log("app.ts: output file created");
           }
-          addImageToImageConatiner(imageContainer, rootDir + "/app/assets/images/output/" + outputimageFilename, namespace);
+          addImageToImageConatiner(imageContainer, $src + "/app/assets/images/output/" + outputimageFilename, namespace);
         }
 
       });
@@ -274,7 +288,8 @@ function writeFiles(filepath: any, imageContainer: any, imageInfoContainer: any,
 
 function displayImagesAndHistograms(){
 
-  var outputDir = rootDir + "/app/assets/images/output/";
+  var outputDir = $rootDir + "/app/assets/images/output/";
+  var outputDirSrc = $src + "/app/assets/images/output/";
 
   // Loop through all the files in the temp directory
   fs.readdir(outputDir, function (err, files) {
@@ -316,11 +331,11 @@ function displayImagesAndHistograms(){
 
         var imageContainer = document.getElementById("image-container-" + namespace);
 
-        addImageToImageConatiner(imageContainer, outputDir + outputimageFilename, namespace);
+        addImageToImageConatiner(imageContainer, outputDirSrc + outputimageFilename, namespace);
 
         var histogramFilename: string = namespace + "_histogram.miff";
 
-        if(fileExists(rootDir + "/app/assets/histograms/" + histogramFilename)){
+        if(fileExists($rootDir + "/app/assets/histograms/" + histogramFilename)){
 
           if(debug){
             console.log("app.ts: files.forEach: namespace: ",namespace);
@@ -328,7 +343,7 @@ function displayImagesAndHistograms(){
 
           var imageInfoContainer = document.getElementById("image-info-container-" + namespace);
 
-          addColorSwatchesToPalette(imageInfoContainer, rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
+          addColorSwatchesToPalette(imageInfoContainer, $rootDir + "/app/assets/histograms/" + histogramFilename,namespace);
 
         }
 
@@ -625,7 +640,7 @@ button.map( (element: any, idx: number) => {
 
   if (typeof dataRoleQuantity !== typeof undefined && dataRoleQuantity !== false) {
 
-    var src = rootDir + "/app/assets/svg/mdi-palette.svg";
+    var src = $src + "/app/assets/svg/mdi-palette.svg";
 
     var img = document.createElement("img");
     img.setAttribute("id","image-quantity-" + dataRoleQuantity);
