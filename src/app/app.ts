@@ -120,7 +120,9 @@ if (os.platform() == "win32") {
   })
 }
 
-console.log(process.env);
+if(debug){
+  console.log(process.env);
+}
 
 // METHODS
 
@@ -130,18 +132,12 @@ function find(outers: any, selector: string, first: boolean) {
   var selector: string = (arguments[1] != null) ? arguments[1] : "";
   var first: boolean = (arguments[2] != null) ? arguments[2] : true;
 
-
   var found_elements: any = [];
-
-  // Find all the outer matched elements
-  //var outers = document.querySelectorAll(selector);
 
   for(var i=0; i<outers.length; i++) {
 
     var elements_in_outer = outers[i].querySelectorAll(selector);
 
-    // document.querySelectorAll() returns an "array-like" collection of elements
-    // convert this "array-like" collection to an array
     elements_in_outer = Array.prototype.slice.call(elements_in_outer);
     
     found_elements = found_elements.concat(elements_in_outer);
@@ -383,10 +379,6 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
 
     rs.addListener('data', function (chunk) {
 
-      if(debug){
-        //console.log("addColorSwatchesToPalette: chunk: ", chunk);
-      }
-
       var chunkFormat = chunk.replace(/[\s]+/igm," ");
       var comment = chunkFormat.replace(/.*(comment[\s]*=[\s]*\{.*\}).*/igm,"$1");
       comment = comment.replace(/(#[a-zA-Z0-9]{6})/igm,"$1,");
@@ -406,7 +398,9 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
         comment = JSON.parse(comment);
       }
       catch(e){
-        //console.log("addColorSwatchesToPalette: JSON.parse: e: ", e);
+        if(debug){
+          console.log("addColorSwatchesToPalette: JSON.parse: e: ", e);
+        }
       }
 
       if(debug){
@@ -448,10 +442,10 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
 
         if(colors.length > 0){
 
-          //if(debug){
+          if(debug){
             console.log("addColorSwatchesToPalette: colors.length: ", colors.length);
             console.log("addColorSwatchesToPalette: colors: ", colors);
-          //}
+          }
 
           imageInfoContainer.innerHTML = "";
 
@@ -479,31 +473,49 @@ function addColorSwatchesToPalette(imageInfoContainer: any, histogramFilePath: s
 
           var imageDataContainer = document.querySelector("#image-data-container-" + namespace);
 
-          
-
-          colors.map( (color: any) => {
+          colors.map( (color: any, idx: number) => {
             var div = document.createElement("div");
-            div.setAttribute("id","swatch-" + namespace);
-            div.setAttribute("class","swatch-" + colorsQty);
+            div.setAttribute("id","swatch-" + namespace + "-" + (idx + 1));
+            div.setAttribute("class","swatch-" + colorsQty + " swatch-squares-" + namespace + " swatch-squares");
             div.setAttribute("style","background:" + color['hex'] + ";");
+            div.setAttribute("data-clicks","0");
             if(imageDataContainer){
-              div.addEventListener("mouseover", function(event: any){
-                imageDataContainer.innerHTML = "";
-                var src = $src + "/app/assets/svg/mdi-close.svg";
-                var img = document.createElement("img");
-                img.setAttribute("src",src);
-                img.addEventListener("click", function(event: any){
-                  imageDataContainer.innerHTML = "";
-                });
-                imageDataContainer.appendChild(img);
-                var span = document.createElement("span");
-                var newtext = document.createTextNode(color['hex']);
-                span.appendChild(newtext);
-                imageDataContainer.appendChild(span);
-              });
               div.addEventListener("click", function(event: any){
-                imageDataContainer.innerHTML = '<div>' + color['hex'] + '</div><div>' + color['rgb'] + '</div>';
+                const swatchSquares = Array.prototype.slice.call(document.querySelectorAll(".swatch-squares-" + namespace));
+                swatchSquares.map( (_element: any, _idx: number) => {
+                  var id1 = _element.getAttribute("id");
+                  var id2 = div.getAttribute("id");
+                  if(id1 != id2){
+                    _element.setAttribute("data-clicks","0");
+                  }
+                });
+                var clicks = 0;
+                if("clicks" in div.dataset){
+                  clicks = parseInt(div.dataset.clicks);
+                }
+                clicks++;
+                if(clicks > 2){
+                  clicks = 0;
+                }
+                if(debug){
+                  console.log("addColorSwatchesToPalette: namespace: ", namespace," idx: ", idx," clicks: ", clicks);
+                }
+                switch (clicks) {
+                  case 1:
+                    imageDataContainer.innerHTML = '<span style="background:' + color['hex']+ ';"></span><span>' + color['hex'] + '</span>';
+                    break;
+                  case 2:
+                    imageDataContainer.innerHTML = '<span style="background:' + color['hex']+ ';"></span><span>' + color['rgb'] + '</span>';
+                    break;  
+                  default:
+                    imageDataContainer.innerHTML = "";
+                    break;
+                }
+                div.dataset.clicks = "" + clicks + "";
               });
+              /* div.addEventListener("mouseover", function(event: any){
+                imageDataContainer.innerHTML = '<span>' + color['hex'] + '</span>';
+              }); */
             }
             imageInfoContainer.appendChild(div);
           });

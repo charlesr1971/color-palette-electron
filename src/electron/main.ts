@@ -38,8 +38,11 @@ class Main {
       height: 600,
       width: 800,
       fullscreen: true,
-      title: `Yet another Electron Application`,
+      title: "Color Palette",
+      //frame: false,
+      //autoHideMenuBar: true,
       webPreferences: {
+        //devTools: false,
         nodeIntegration: true
       }
     });
