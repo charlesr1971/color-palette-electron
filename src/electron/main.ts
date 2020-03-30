@@ -52,17 +52,18 @@ class Main {
       isPackaged = process.mainModule.filename.indexOf('app.asar') !== -1;
     }
     const location = path.join(rootPath, 'resources/app.asar/index.html');
-    if(this.debug){
+    //if(this.debug){
       console.log("main.ts: createWindow: process.env: ",process.env);
       console.log("main.ts: createWindow: process.mainModule: ",process.mainModule);
       console.log("main.ts: createWindow: isPackaged: ",isPackaged);
       console.log("main.ts: createWindow: location: ",location);
-    }
+    //}
     if(isPackaged){
       this.mainWindow.loadFile(location);
     }
     else{
-      this.mainWindow.loadFile('../../index.html');
+      //this.mainWindow.loadFile('../../index.html');
+      this.mainWindow.loadFile('./index.html');
     }
   }
 

@@ -18,6 +18,13 @@
       "target": "nsis",
       "icon": "build/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": false
+    },
     "extends": null,
     "files": [
       "./index.html",
@@ -28,10 +35,10 @@
   "scripts": {
     "build": "tsc && npm run copy:assets",
     "watch": "tsc -w",
-    "start": "npm run build && electron ./dist/electron/main.js",
+    "start": "npm run build && electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "pack": "electron-builder --windows",
-    "electron:build": "npm run build && electron ./dist/electron/main.js && electron-builder --windows",
+    "electron:build": "npm run build && electron . && electron-builder --windows",
     "electron:pack": "electron-builder --prepackaged ./dist/win-unpacked --windows",
     "postinstall": "electron-builder install-app-deps",
     "copy:assets": "cpx ./src/app/assets/** ./dist/app/assets"

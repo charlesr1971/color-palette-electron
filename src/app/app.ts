@@ -32,13 +32,13 @@ if(isPackaged){
   $src = appDir.replace(regex,"$1") + "dist";
 }
 
-if(debug){
+//if(debug){
   console.log('app.ts: configDir: ',configDir);
   console.log('app.ts: appDir: ',appDir);
   console.log('app.ts: isPackaged: ',isPackaged);
   console.log('app.ts: $rootDir: ',$rootDir);
   console.log('app.ts: $src: ',$src);
-}
+//}
 
 var swatchQtyAscArr = [5,10,25,50];
 var swatchQtyDescArr = swatchQtyAscArr.reverse();
