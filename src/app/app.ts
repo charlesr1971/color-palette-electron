@@ -10,13 +10,14 @@ import * as graphicsmagick from 'graphicsmagick-static';
 import * as os from 'os';
 import * as gm from 'gm';
 import * as fs from "fs";
+import * as fse from "fs-extra";
 
 import * as Store from "electron-store";
 
 
 // GLOBALS
 
-var debug = false;
+var debug = true;
 
 var $rootDir = "dist";
 var $src = $rootDir;
@@ -27,9 +28,55 @@ const appDir =  (electron.app || electron.remote.app).getAppPath();
 const  isPackaged = appDir.indexOf('app.asar') !== -1;
 
 if(isPackaged){
+  
   $rootDir = "resources/dist";
   var regex = /(.*)app.asar.*/igm;
   $src = appDir.replace(regex,"$1") + "dist";
+
+  var targetDir = configDir + "\\dist\\app\\assets";
+  var sourceDir = $src + "\\app\\assets";
+
+  var targetDistDir = configDir + "\\dist";
+  var targetAppDir = configDir + "\\dist\\app";
+  var targetHistogramsDir = configDir + "\\dist\\app\\assets\\histograms";
+  
+
+  //if(debug){
+    console.log('app.ts: targetDir: ',targetDir);
+    console.log('app.ts: sourceDir: ',sourceDir);
+
+    console.log('app.ts: targetDistDir: ',targetDistDir);
+    console.log('app.ts: targetAppDir: ',targetAppDir);
+    console.log('app.ts: targetHistogramsDir: ',targetHistogramsDir);
+    
+  //}
+  
+  
+
+  if (!fs.existsSync(targetDistDir)){
+    fs.mkdirSync(targetDistDir);
+    if (fs.existsSync(targetDistDir) && !fs.existsSync(targetAppDir)){
+      fs.mkdirSync(targetAppDir);
+    }
+    if (fs.existsSync(targetAppDir) && !fs.existsSync(targetDir)){
+      fs.mkdirSync(targetDir);
+    }
+  }
+
+  try {
+    if (!fs.existsSync(targetHistogramsDir)){
+      fse.copySync(sourceDir,targetDir);
+      if (fs.existsSync(targetDistDir)){
+        $rootDir = targetDistDir;
+        $src = targetDistDir;
+      }
+    }
+    console.log('success!')
+  } catch (err) {
+    console.error(err)
+  }
+
+  
 }
 
 //if(debug){

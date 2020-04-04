@@ -17,7 +17,7 @@ export class ImageInfoChannel implements IpcChannelInterface {
       request.responseChannel = `${this.getName()}_response`;
     }
     let size = null;
-    gm(this.rootDir + "/app/assets/images/for-palette/1.jpg").size(function(err, value){
+    gm(this.rootDir + "/app/assets/images/output/1_out_image.jpg").size(function(err, value){
       size = value;
     })
     event.sender.send(request.responseChannel, { size: size });
